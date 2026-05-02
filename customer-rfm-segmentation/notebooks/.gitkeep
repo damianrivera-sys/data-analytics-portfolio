@@ -1,1 +1,116 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
+"""
+RFM Analysis for Online Retail Dataset
+---------------------------------------
+Author: Julio Damián Rivera
+Purpose: Customer segmentation based on Recency, Frequency, Monetary value.
+"""
+
+import os
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Configuración de rutas relativas
+# Si este script está en la carpeta 'notebooks/', usamos '../' para subir un nivel
+script_dir = os.path.dirname(os.path.abspath(__file__))
+project_root = os.path.dirname(script_dir) if script_dir.endswith('notebooks') else script_dir
+
+# Definir rutas
+data_raw_path = os.path.join(project_root, 'data', 'raw', 'Online Retail.xlsx')
+images_dir = os.path.join(project_root, 'images')
+outputs_dir = os.path.join(project_root, 'outputs')
+
+# Crear directorios si no existen
+os.makedirs(images_dir, exist_ok=True)
+os.makedirs(outputs_dir, exist_ok=True)
+
+print("📁 Directorios listos.")
+print(f"   Dataset esperado en: {data_raw_path}")
+
+# ---------- 1. Cargar y limpiar datos ----------
+try:
+    df = pd.read_excel(data_raw_path)
+    print("✅ Dataset cargado correctamente.")
+except FileNotFoundError:
+    print(f"❌ No se encontró el archivo en {data_raw_path}")
+    print("Descárgalo de https://archive.ics.uci.edu/ml/datasets/online+retail y colócalo en data/raw/")
+    exit(1)
+
+print("🔍 Información original:")
+print(df.info())
+
+# Limpiar datos
+df = df.dropna(subset=['CustomerID'])
+df = df[(df['Quantity'] > 0) & (df['UnitPrice'] > 0)]
+df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
+df['TotalPrice'] = df['Quantity'] * df['UnitPrice']
+
+print(f"🧹 Datos limpios: {df.shape[0]} filas, {df.shape[1]} columnas")
+
+# ---------- 2. Visualizaciones básicas ----------
+# Top 10 productos
+top_products = df.groupby('Description')['TotalPrice'].sum().sort_values(ascending=False).head(10)
+plt.figure(figsize=(10,5))
+top_products.plot(kind='bar')
+plt.title("Top 10 Productos por Ingresos")
+plt.ylabel("Ingresos")
+plt.tight_layout()
+plt.savefig(os.path.join(images_dir, 'top_products.png'), bbox_inches='tight')
+plt.show()
+
+# Top 10 países
+country_sales = df.groupby('Country')['TotalPrice'].sum().sort_values(ascending=False).head(10)
+plt.figure(figsize=(10,5))
+country_sales.plot(kind='bar')
+plt.title("Top 10 Países por Ingresos")
+plt.tight_layout()
+plt.savefig(os.path.join(images_dir, 'top_countries.png'), bbox_inches='tight')
+plt.show()
+
+# ---------- 3. Cálculo de métricas RFM ----------
+snapshot_date = df['InvoiceDate'].max() + pd.Timedelta(days=1)
+
+rfm = df.groupby('CustomerID').agg({
+    'InvoiceDate': lambda x: (snapshot_date - x.max()).days,
+    'InvoiceNo': 'count',
+    'TotalPrice': 'sum'
+}).rename(columns={
+    'InvoiceDate': 'Recency',
+    'InvoiceNo': 'Frequency',
+    'TotalPrice': 'Monetary'
+})
+
+# ---------- 4. Asignar puntuaciones (cuartiles) ----------
+rfm['R_score'] = pd.qcut(rfm['Recency'], 4, labels=[4,3,2,1])
+rfm['F_score'] = pd.qcut(rfm['Frequency'], 4, labels=[1,2,3,4])
+rfm['M_score'] = pd.qcut(rfm['Monetary'], 4, labels=[1,2,3,4])
+rfm['RFM_Score'] = rfm[['R_score','F_score','M_score']].sum(axis=1)
+
+# ---------- 5. Visualización de distribución RFM ----------
+plt.figure(figsize=(10,5))
+rfm['RFM_Score'].value_counts().sort_index().plot(kind='bar')
+plt.title("Distribución de Clientes por RFM Score")
+plt.xlabel("RFM Score")
+plt.ylabel("Número de clientes")
+plt.tight_layout()
+plt.savefig(os.path.join(images_dir, 'rfm_score_distribution.png'), bbox_inches='tight')
+plt.show()
+
+# ---------- 6. Guardar resultados ----------
+csv_output = os.path.join(outputs_dir, 'rfm_analysis.csv')
+rfm.to_csv(csv_output)
+print(f"✅ Archivo CSV guardado en: {csv_output}")
+
+# ---------- 7. Insights ----------
+print("\n" + "="*50)
+print("INSIGHTS:")
+print("- Un pequeño grupo de clientes genera la mayor parte de los ingresos.")
+print("- Existe alta concentración de ventas en pocos productos.")
+print("- Clientes con alta frecuencia y gasto deben ser retenidos.")
+print("="*50)
+
+print("\n🎉 Análisis completado. Las imágenes se guardaron en la carpeta 'images'.")
