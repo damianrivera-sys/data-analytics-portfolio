@@ -28,19 +28,19 @@ outputs_dir = os.path.join(project_root, 'outputs')
 os.makedirs(images_dir, exist_ok=True)
 os.makedirs(outputs_dir, exist_ok=True)
 
-print("📁 Directorios listos.")
+print("Directorios listos.")
 print(f"   Dataset esperado en: {data_raw_path}")
 
 # ---------- 1. Cargar y limpiar datos ----------
 try:
     df = pd.read_excel(data_raw_path)
-    print("✅ Dataset cargado correctamente.")
+    print("Dataset cargado correctamente.")
 except FileNotFoundError:
-    print(f"❌ No se encontró el archivo en {data_raw_path}")
+    print(f"No se encontró el archivo en {data_raw_path}")
     print("Descárgalo de https://archive.ics.uci.edu/ml/datasets/online+retail y colócalo en data/raw/")
     exit(1)
 
-print("🔍 Información original:")
+print("Información original:")
 print(df.info())
 
 # Limpiar datos
@@ -49,7 +49,7 @@ df = df[(df['Quantity'] > 0) & (df['UnitPrice'] > 0)]
 df['InvoiceDate'] = pd.to_datetime(df['InvoiceDate'])
 df['TotalPrice'] = df['Quantity'] * df['UnitPrice']
 
-print(f"🧹 Datos limpios: {df.shape[0]} filas, {df.shape[1]} columnas")
+print(f" Datos limpios: {df.shape[0]} filas, {df.shape[1]} columnas")
 
 # ---------- 2. Visualizaciones básicas ----------
 # Top 10 productos
@@ -103,7 +103,7 @@ plt.show()
 # ---------- 6. Guardar resultados ----------
 csv_output = os.path.join(outputs_dir, 'rfm_analysis.csv')
 rfm.to_csv(csv_output)
-print(f"✅ Archivo CSV guardado en: {csv_output}")
+print(f"Archivo CSV guardado en: {csv_output}")
 
 # ---------- 7. Insights ----------
 print("\n" + "="*50)
