@@ -1,14 +1,6 @@
-# Excel Automation – Reporting System
-
-## Problem
-Manual reporting takes too much time.
-
-## Solution
-Automated reporting process using Excel and VBA.
-
-## Results
-- Reduced reporting time by 80%
-- Eliminated manual errors
-
-## Tools
-Excel, VBA
+excel-automation/
+├── README.md
+├── macro_vba.bas (el código VBA, puedes ofuscar datos sensibles)
+├── sample_data.xlsx (datos de ejemplo anonimizados)
+└── images/
+    └── (capturas de pantalla del antes/después, si tienes)
