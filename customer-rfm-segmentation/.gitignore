@@ -1,1 +1,6 @@
-
+*.pyc
+__pycache__/
+.ipynb_checkpoints/
+data/raw/*.xlsx
+outputs/
+.DS_Store
