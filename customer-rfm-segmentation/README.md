@@ -44,4 +44,4 @@ A UK-based online retailer wants to understand its customer base to improve rete
 - `outputs/rfm_analysis.csv` contains the final RFM table for each customer.
 
 ## Contact
-Julio Damián Rivera – [LinkedIn](https://linkedin.com/in/julio-damian-rivera-cruz) – damian.rivera@uabc.edu.mx
+Julio Damian Rivera – [LinkedIn](https://linkedin.com/in/julio-damian-rivera-cruz) – damian.rivera@uabc.edu.mx
